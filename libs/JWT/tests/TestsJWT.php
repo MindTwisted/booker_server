@@ -28,9 +28,11 @@ class TestsJWT extends PHPUnit_Framework_TestCase
      */
     public function testTokenValidFormat()
     {
-        $this->assertRegExp('/^[\w\-]+\.[\w\-]+\.[\w\-]+$/', self::$primaryToken);
-        $this->assertRegExp('/^[\w\-]+\.[\w\-]+\.[\w\-]+$/', self::$secondaryToken);
-        $this->assertRegExp('/^[\w\-]+\.[\w\-]+\.[\w\-]+$/', self::$tokenWithExp);
+        $pattern = '/^[\w\-]+\.[\w\-]+\.[\w\-]+$/';
+
+        $this->assertRegExp($pattern, self::$primaryToken);
+        $this->assertRegExp($pattern, self::$secondaryToken);
+        $this->assertRegExp($pattern, self::$tokenWithExp);
     }
 
     /**
