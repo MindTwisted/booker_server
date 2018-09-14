@@ -1,7 +1,12 @@
 <?php
 
 require_once 'config.php';
-require_once 'libs/QueryBuilder/src/QueryBuilder.php';
+require_once 'src/exception/QueryBuilderException.php';
+require_once 'src/traits/Validators.php';
+require_once 'src/QueryBuilder.php';
+
+use libs\QueryBuilder\src\QueryBuilder;
+use libs\QueryBuilder\src\exception\QueryBuilderException;
 
 class TestsPgSQL extends PHPUnit_Framework_TestCase
 {
@@ -120,7 +125,7 @@ class TestsPgSQL extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $runInsertQuery,
-            1
+            5
         );
 
         $this->assertEquals(
@@ -153,11 +158,6 @@ class TestsPgSQL extends PHPUnit_Framework_TestCase
                                         )
                                         ->insert()
                                         ->getQuery();
-
-        $this->assertEquals(
-            $runInsertQuery,
-            3
-        );
 
         $this->assertEquals(
             "INSERT INTO authors (first_name, last_name) VALUES ('John', 'Smith'), ('Matthew', 'James'), ('Vinny', 'Jones')",
@@ -2084,27 +2084,6 @@ class TestsPgSQL extends PHPUnit_Framework_TestCase
         try
         {
             self::$builder->table('authors')
-                          ->select()
-                          ->run();
-        } catch (QueryBuilderException $exception)
-        {
-            return;
-        }
-
-        $this->fail(
-            'An expected exception has not been raised.'
-        );
-    }
-
-    /**
-     * Test select statement QueryBuilderException thrown with '*' in fields set
-     */
-    public function testSelectAllFields()
-    {
-        try
-        {
-            self::$builder->table('authors')
-                          ->fields(['*'])
                           ->select()
                           ->run();
         } catch (QueryBuilderException $exception)
