@@ -1,9 +1,9 @@
 <?php
 
-require_once 'config.php';
-require_once 'src/exception/QueryBuilderException.php';
-require_once 'src/traits/Validators.php';
-require_once 'src/QueryBuilder.php';
+require_once 'libs/QueryBuilder/config.php';
+require_once 'libs/QueryBuilder/src/exception/QueryBuilderException.php';
+require_once 'libs/QueryBuilder/src/traits/Validators.php';
+require_once 'libs/QueryBuilder/src/QueryBuilder.php';
 
 use libs\QueryBuilder\src\QueryBuilder;
 use libs\QueryBuilder\src\exception\QueryBuilderException;
