@@ -1,6 +1,6 @@
 <?php
 
-namespace libs;
+namespace libs\Validator;
 
 use libs\QueryBuilder\src\QueryBuilder;
 use libs\Input;
