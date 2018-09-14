@@ -3,7 +3,7 @@
 namespace libs\Validator;
 
 use libs\QueryBuilder\src\QueryBuilder;
-use libs\Input;
+use libs\Input\Input;
 
 class Validator
 {
@@ -421,7 +421,7 @@ class Validator
     }
 
     /**
-     * Check if Validator fails
+     * Check if validation fails
      */
     public function fails()
     {
@@ -498,7 +498,7 @@ class Validator
 
                         if (!self::$methodName($fieldValue, $first, $second, $third)) 
                         {
-                            $messages[] = self::$message($key, $first);
+                            $messages[] = self::$message(ucfirst($key), $first);
                         }
                     }
                 }
