@@ -8,7 +8,7 @@ require_once 'libs/QueryBuilder/src/QueryBuilder.php';
 use libs\QueryBuilder\src\QueryBuilder;
 use libs\QueryBuilder\src\exception\QueryBuilderException;
 
-class TestsPgSQL extends PHPUnit_Framework_TestCase
+class QueryBuilderPgSQLTest extends PHPUnit_Framework_TestCase
 {
     protected static $builder;
 

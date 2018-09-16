@@ -4,7 +4,7 @@ require_once 'libs/Input/Input.php';
 
 use libs\Input\Input;
 
-class TestsInput extends PHPUnit_Framework_TestCase
+class InputTest extends PHPUnit_Framework_TestCase
 {
     /**
      * Test collect input from request with GET method

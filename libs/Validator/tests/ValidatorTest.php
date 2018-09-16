@@ -11,7 +11,7 @@ use libs\Validator\Validator;
 use libs\Input\Input;
 use libs\QueryBuilder\src\QueryBuilder;
 
-class TestsValidator extends PHPUnit_Framework_TestCase
+class ValidatorTest extends PHPUnit_Framework_TestCase
 {
     /**
      * QueryBuilder instance

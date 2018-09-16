@@ -4,7 +4,7 @@ require_once 'libs/JWT/JWT.php';
 
 use libs\JWT\JWT;
 
-class TestsJWT extends PHPUnit_Framework_TestCase
+class JWTTest extends PHPUnit_Framework_TestCase
 {
     /**
      * Tokens for tests
