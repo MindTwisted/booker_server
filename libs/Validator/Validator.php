@@ -307,7 +307,12 @@ class Validator
      */
     private static function checkMinLength($field, $minLength)
     {
-        return $field && strlen($field) >= $minLength;
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        return strlen($field) >= $minLength;
     }
 
     /**

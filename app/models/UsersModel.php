@@ -4,68 +4,76 @@ namespace app\models;
 
 class UsersModel extends Model
 {
-    // public function getAllUsers()
-    // {
-    //     $dbPrefix = self::$dbPrefix;
+    /**
+     * Get users from database
+     */
+    public function getUsers($id = null)
+    {
+        $dbPrefix = self::$dbPrefix;
 
-    //     $users = self::$builder->table("{$dbPrefix}users")
-    //         ->fields(['id', 'name', 'email', 'role', 'discount'])
-    //         ->select()
-    //         ->run();
+        $users = self::$builder->table("{$dbPrefix}users")
+            ->fields(['id', 'name', 'email', 'role']);
+        
+        if (null !== $id)
+        {
+            $users = $users->where(['id', '=', $id])->limit(1);
+        }
+            
+        $users = $users->select()->run();
 
-    //     return $users;
-    // }
+        return $users;
+    }
 
-    // public function getUserById($id)
-    // {
-    //     $dbPrefix = self::$dbPrefix;
+    /**
+     * Add user into database
+     */
+    public function addUser($name, $email, $password)
+    {
+        $dbPrefix = self::$dbPrefix;
 
-    //     $user = self::$builder->table("{$dbPrefix}users")
-    //         ->fields(['id', 'name', 'email', 'role', 'discount'])
-    //         ->where(['id', '=', $id])
-    //         ->limit(1)
-    //         ->select()
-    //         ->run();
+        return self::$builder->table("{$dbPrefix}users")
+            ->fields(['name', 'email', 'password'])
+            ->values([$name, $email, password_hash($password, PASSWORD_BCRYPT)])
+            ->insert()
+            ->run();
+    }
 
-    //     return $user;
-    // }
+    /**
+     * Update user in database
+     */
+    public function updateUser($id, $name, $email, $password = null)
+    {
+        $dbPrefix = self::$dbPrefix;
 
-    // public function addUser($name, $email, $password)
-    // {
-    //     $dbPrefix = self::$dbPrefix;
+        $fields = ['name', 'email'];
+        $values = [$name, $email];
 
-    //     return self::$builder->table("{$dbPrefix}users")
-    //         ->fields(['name', 'email', 'password'])
-    //         ->values([$name, $email, password_hash($password, PASSWORD_BCRYPT)])
-    //         ->insert()
-    //         ->run();
-    // }
+        if (null !== $password)
+        {
+            $fields[] = 'password';
+            $values[] = password_hash($password, PASSWORD_BCRYPT);
+        }
 
-    // public function updateUser($id, $name, $email, $password = null, $discount = null)
-    // {
-    //     $dbPrefix = self::$dbPrefix;
+        self::$builder->table("{$dbPrefix}users")
+            ->fields($fields)
+            ->values($values)
+            ->where(['id', '=', $id])
+            ->limit(1)
+            ->update()
+            ->run();
+    }
 
-    //     $fields = ['name', 'email'];
-    //     $values = [$name, $email];
+    /**
+     * Delete user from database
+     */
+    public function deleteUser($id)
+    {
+        $dbPrefix = self::$dbPrefix;
 
-    //     if (null !== $password)
-    //     {
-    //         $fields[] = 'password';
-    //         $values[] = password_hash($password, PASSWORD_BCRYPT);
-    //     }
-
-    //     if (null !== $discount)
-    //     {
-    //         $fields[] = 'discount';
-    //         $values[] = $discount;
-    //     }
-
-    //     self::$builder->table("{$dbPrefix}users")
-    //         ->fields($fields)
-    //         ->values($values)
-    //         ->where(['id', '=', $id])
-    //         ->limit(1)
-    //         ->update()
-    //         ->run();
-    // }
+        self::$builder->table("{$dbPrefix}users")
+            ->where(['id', '=', $id])
+            ->limit(1)
+            ->delete()
+            ->run();
+    }
 }
