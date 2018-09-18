@@ -67,6 +67,56 @@ Router::add('users.delete', [
     ]
 ]);
 
+// Rooms routes
+Router::add('rooms.index', [
+    'url' => '/api/rooms',
+    'method' => 'GET',
+    'controller' => ['app\controllers\RoomsController', 'index'],
+    'filters' => [
+        'permission' => 'isAuth'
+    ]
+]);
+
+Router::add('rooms.show', [
+    'url' => '/api/rooms/:id',
+    'method' => 'GET',
+    'controller' => ['app\controllers\RoomsController', 'show'],
+    'filters' => [
+        'permission' => 'isAuth',
+        'paramValidation' => 'exists:rooms:id'
+    ]
+]);
+
+
+Router::add('rooms.store', [
+    'url' => '/api/rooms',
+    'method' => 'POST',
+    'controller' => ['app\controllers\RoomsController', 'store'],
+    'filters' => [
+        'permission' => 'isAdmin'
+    ]
+]);
+
+Router::add('rooms.update', [
+    'url' => '/api/rooms/:id',
+    'method' => 'PUT',
+    'controller' => ['app\controllers\RoomsController', 'update'],
+    'filters' => [
+        'permission' => 'isAdmin',
+        'paramValidation' => 'exists:rooms:id'
+    ]
+]);
+
+Router::add('rooms.delete', [
+    'url' => '/api/rooms/:id',
+    'method' => 'DELETE',
+    'controller' => ['app\controllers\RoomsController', 'delete'],
+    'filters' => [
+        'permission' => 'isAdmin',
+        'paramValidation' => 'exists:rooms:id'
+    ]
+]);
+
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUrl = '/' . implode('/', array_slice(explode('/', explode('?', $_SERVER['REQUEST_URI'])[0]), 3));
 
