@@ -117,6 +117,26 @@ Router::add('rooms.delete', [
     ]
 ]);
 
+// Events routes
+Router::add('events.index', [
+    'url' => '/api/events',
+    'method' => 'GET',
+    'controller' => ['app\controllers\EventsController', 'index'],
+    'filters' => [
+        'permission' => 'isAuth'
+    ]
+]);
+
+Router::add('events.show', [
+    'url' => '/api/events/:id',
+    'method' => 'GET',
+    'controller' => ['app\controllers\EventsController', 'show'],
+    'filters' => [
+        'permission' => 'isAuth',
+        'paramValidation' => 'exists:events:id'
+    ]
+]);
+
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUrl = '/' . implode('/', array_slice(explode('/', explode('?', $_SERVER['REQUEST_URI'])[0]), 3));
 

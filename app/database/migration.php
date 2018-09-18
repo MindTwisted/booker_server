@@ -47,7 +47,7 @@ $builderMySQL->raw(
 $builderMySQL->raw(
     "CREATE TABLE {$prefix}events (
                   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                  recur_id INT UNSIGNED DEFAULT NULL,
+                  recur_id BIGINT UNSIGNED DEFAULT NULL,
                   description TEXT NOT NULL,
                   start_time TIMESTAMP NOT NULL DEFAULT '1980-01-01 00:00:00',
                   end_time TIMESTAMP NOT NULL DEFAULT '1980-01-01 00:00:00',
