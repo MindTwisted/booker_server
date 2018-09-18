@@ -37,20 +37,17 @@ class EventsModel extends Model
         {
             $whereClause = [];
 
-            foreach($filters as $filter)
+            foreach($filters as $key => $value)
             {
-                foreach($filter as $key => $value)
-                {
-                    $expValue = explode(':', $value);
+                $expValue = explode(':', $value);
 
-                    $field = $key;
-                    $sign = count($expValue) > 1 ? $expValue[0] : '=';
-                    $sign = str_replace(['gt', 'lt', '='], ['>', '<', '='], $sign);
-                    $sign = in_array($sign, ['>', '<', '=']) ? $sign : '=';
-                    $value = count($expValue) > 1 ? $expValue[1] : $expValue[0];
+                $field = $key;
+                $sign = count($expValue) > 1 ? $expValue[0] : '=';
+                $sign = str_replace(['gt', 'lt', '='], ['>', '<', '='], $sign);
+                $sign = in_array($sign, ['>', '<', '=']) ? $sign : '=';
+                $value = count($expValue) > 1 ? $expValue[1] : $expValue[0];
 
-                    $whereClause[] = [$field, $sign, $value];
-                }
+                $whereClause[] = [$field, $sign, $value];
             }
 
             $events = $events->andWhere(...$whereClause);

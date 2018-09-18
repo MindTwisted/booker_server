@@ -7,6 +7,7 @@ use libs\Validator\Validator;
 use libs\Input\Input;
 
 use app\models\RoomsModel;
+use app\models\EventsModel;
 
 class RoomsController
 {
@@ -16,11 +17,17 @@ class RoomsController
     protected $roomsModel;
 
     /**
+     * EventsModel instance
+     */
+    protected $eventsModel;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->roomsModel = new RoomsModel();
+        $this->eventsModel = new EventsModel();
     }
 
     /**
@@ -105,6 +112,20 @@ class RoomsController
      */
     public function delete($id)
     {
+        $datetimeNow = date("Y-m-d H:i:s", time());
+
+        $events = $this->eventsModel->getEvents(null, [
+            'room_id' => $id,
+            'start_time' => "gt:{$datetimeNow}"
+        ]);
+
+        if (count($events) > 0)
+        {
+            return View::render([
+                'text' => "The room with coming events can't be deleted."
+            ], 409);
+        }
+
         $this->roomsModel->deleteRoom($id);
 
         return View::render([

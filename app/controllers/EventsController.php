@@ -37,22 +37,22 @@ class EventsController
         
         if (null !== $user_id)
         {
-            $filters[] = compact('user_id');
+            $filters['user_id'] = $user_id;
         }
 
         if (null !== $room_id)
         {
-            $filters[] = compact('room_id');
+            $filters['room_id'] = $room_id;
         }
 
         if (null !== $start_time)
         {
-            $filters[] = compact('start_time');
+            $filters['start_time'] = $start_time;
         }
 
         if (null !== $end_time)
         {
-            $filters[] = compact('end_time');
+            $filters['end_time'] = $end_time;
         }
 
         $events = $this->eventsModel->getEvents(null, $filters);
