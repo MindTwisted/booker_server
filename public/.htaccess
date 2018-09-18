@@ -1,0 +1,15 @@
+<Limit GET POST PUT DELETE>
+  Allow from all
+</Limit>
+
+Header set Access-Control-Allow-Origin "*"
+
+RewriteEngine On 
+
+# RewriteBase /~user5/books-store-server/
+RewriteBase /booker/server/
+
+RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^.*$ index.php
