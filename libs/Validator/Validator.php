@@ -66,6 +66,10 @@ class Validator
             'method' => 'checkExists',
             'message' => 'existsMessage',
         ],
+        "/^exists_soft:([a-zA-Z0-9\-\_]+):([a-zA-Z0-9\-\_]+):([a-zA-Z0-9\-\_]+)$/" => [
+            'method' => 'checkExistsSoft',
+            'message' => 'existsSoftMessage',
+        ],
         "/^included:\(([a-zA-Z0-9\-\_\,\s]+)\)$/" => [
             'method' => 'checkIncluded',
             'message' => 'includedMessage',
@@ -74,7 +78,62 @@ class Validator
             'method' => 'checkAlphaDash',
             'message' => 'alphaDashMessage',
         ],
+        "/^ts_not_in_past$/" => [
+            'method' => 'checkTsNotInPast',
+            'message' => 'tsNotInPastMessage',
+        ],
+        "/^ts_not_weekend$/" => [
+            'method' => 'checkTsNotWeekend',
+            'message' => 'tsNotWeekendMessage',
+        ],
+        "/^ts_in_hours_range:\(([0-9\:\,\s]+)\)$/" => [
+            'method' => 'checkTsInHoursRange',
+            'message' => 'tsInHoursRangeMessage',
+        ],
+        "/^ts_bigger_than:([a-zA-Z0-9\-\_]+)$/" => [
+            'method' => 'checkTsBiggerThan',
+            'message' => 'tsBiggerThanMessage',
+        ],
+        "/^ts_bigger_min:([a-zA-Z0-9\-\_]+):([a-zA-Z0-9\-\_]+)$/" => [
+            'method' => 'checkTsBiggerMin',
+            'message' => 'tsBiggerMinMessage',
+        ],
+        "/^ts_bigger_max:([a-zA-Z0-9\-\_]+):([a-zA-Z0-9\-\_]+)$/" => [
+            'method' => 'checkTsBiggerMax',
+            'message' => 'tsBiggerMaxMessage',
+        ],
     ];
+
+    /**
+     * Format time from seconds to minutes or hours
+     */
+    private static function formatTime($seconds)
+    {
+        $hours = $seconds / 3600;
+        $minutes = $seconds / 60;
+
+        if ($hours === 1)
+        {
+            return "$hours hour";
+        }
+
+        if ($hours > 1)
+        {
+            return "$hours hours";
+        }
+
+        if ($minutes === 1)
+        {
+            return "$minutes minute";
+        }
+        
+        if ($minutes > 1)
+        {
+            return "$minutes minutes";
+        }
+
+        return "$seconds seconds";
+    }
 
     /**
      * Generate message for required rule failure
@@ -157,6 +216,14 @@ class Validator
     }
 
     /**
+     * Generate message for existsSoft rule failure
+     */
+    private static function existsSoftMessage($field)
+    {
+        return "$field field value doesn't exists in database.";
+    }
+
+    /**
      * Generate message for included rule failure
      */
     private static function includedMessage($field, $list)
@@ -170,6 +237,60 @@ class Validator
     private static function alphaDashMessage($field)
     {
         return "$field field requires only alphanumeric characters with dashes, underscores and spaces.";
+    }
+
+    /**
+     * Generate message for tsNotInPast rule failure
+     */
+    private static function tsNotInPastMessage($field)
+    {
+        return "$field timestamp can't be in past.";
+    }
+
+    /**
+     * Generate message for tsNotWeekend rule failure
+     */
+    private static function tsNotWeekendMessage($field)
+    {
+        return "$field timestamp can't be a weekend.";
+    }
+
+     /**
+     * Generate message for tsInHoursRange rule failure
+     */
+    private static function tsInHoursRangeMessage($field, $range)
+    {
+        list($start, $end) = array_map('trim', explode(',', $range));
+
+        return "$field timestamp must be between $start and $end.";
+    }
+
+    /**
+     * Generate message for tsBiggerThan rule failure
+     */
+    private static function tsBiggerThanMessage($field, $secondField)
+    {
+        return "$field timestamp can't be less than $secondField timestamp.";
+    }
+
+    /**
+     * Generate message for tsBiggerMin rule failure
+     */
+    private static function tsBiggerMinMessage($field, $secondField, $difference)
+    {
+        $differenceFormatted = self::formatTime($difference);
+
+        return "$field timestamp must be bigger than $secondField timestamp for at least $differenceFormatted.";
+    }
+
+    /**
+     * Generate message for tsBiggerMax rule failure
+     */
+    private static function tsBiggerMaxMessage($field, $secondField, $difference)
+    {
+        $differenceFormatted = self::formatTime($difference);
+
+        return "$field timestamp can be bigger than $secondField timestamp for max $differenceFormatted.";
     }
 
     /**
@@ -406,6 +527,45 @@ class Validator
     }
 
     /**
+     * ExistsSoft rule check
+     */
+    private static function checkExistsSoft($field, $uTable, $uField, $softField)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+        
+        $uTable = self::$dbPrefix . $uTable;
+ 
+        if (!is_array($field))
+        {
+            $result = self::$builder->table($uTable)
+                                    ->fields([$uField])
+                                    ->where([$uField, '=', $field])
+                                    ->andWhere([$softField, '=', '1'])
+                                    ->limit(1)
+                                    ->select()
+                                    ->run();
+
+            return count($result) > 0;
+        }
+
+        $sqlQuery = "SELECT $uField FROM $uTable WHERE";
+
+        foreach($field as $row)
+        {
+            $sqlQuery .= " ($uField = ? AND $softField = 1) OR";
+        }
+
+        $sqlQuery = trim($sqlQuery, 'OR');
+
+        $result = self::$builder->raw($sqlQuery, $field)->fetchAll(\PDO::FETCH_ASSOC);
+
+        return count($result) === count($field);
+    }
+
+    /**
      * Included rule check
      */
     private static function checkIncluded($field, $list)
@@ -431,6 +591,90 @@ class Validator
         }
 
         return !!preg_match('/^[\w\s\-]+$/', $field);
+    }
+
+    /**
+     * TsNotInPast rule check
+     */
+    private static function checkTsNotInPast($field)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        return $field > time();
+    }
+
+    /**
+     * TsNotWeekend rule check
+     */
+    private static function checkTsNotWeekend($field)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        return date('N', $field) < 6;
+    }
+
+    /**
+     * TsInHoursRange rule check
+     */
+    private static function checkTsInHoursRange($field, $range)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        list($start, $end) = array_map('trim', explode(',', $range));
+
+        $startTime = \DateTime::createFromFormat('H:i:s', $start);
+        $endTime = \DateTime::createFromFormat('H:i:s', $end);
+        $checkTime = \DateTime::createFromFormat('H:i:s', date('H:i:s', $field));
+
+        return $checkTime >= $startTime && $checkTime <= $endTime;
+    }
+
+     /**
+     * TsBiggerThan rule check
+     */
+    private static function checkTsBiggerThan($field, $secondField)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        return +$field > +Input::get($secondField);
+    }
+
+    /**
+     * TsBiggerMin rule check
+     */
+    private static function checkTsBiggerMin($field, $secondField, $difference)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        return (+$field - +Input::get($secondField)) >= $difference;
+    }
+
+    /**
+     * TsBiggerMax rule check
+     */
+    private static function checkTsBiggerMax($field, $secondField, $difference)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        return (+$field - +Input::get($secondField)) <= $difference;
     }
 
     /**
@@ -519,7 +763,7 @@ class Validator
 
                         if (!self::$methodName($fieldValue, $first, $second, $third)) 
                         {
-                            $messages[] = self::$message(ucfirst($key), $first);
+                            $messages[] = self::$message($key, $first, $second);
                         }
                     }
                 }

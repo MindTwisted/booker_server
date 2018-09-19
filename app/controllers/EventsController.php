@@ -8,7 +8,6 @@ use libs\Validator\Validator;
 use libs\Input\Input;
 
 use app\models\EventsModel;
-use app\models\UsersModel;
 
 class EventsController
 {
@@ -16,31 +15,6 @@ class EventsController
      * EventsModel instance
      */
     protected $eventsModel;
-
-     /**
-     * UsersModel instance
-     */
-    protected $usersModel;
-
-    /**
-     * Check if timestamp is weekend
-     */
-    private function isWeekend($timestamp)
-    {
-        return date('N', $timestamp) >= 6;
-    }
-
-    /**
-     * Check if timestamp is between 08:00:00 and 20:00:00
-     */
-    private function isWorkingHours($timestamp)
-    {
-        $startTime = \DateTime::createFromFormat('H:i:s', '08:00:00');
-        $endTime = \DateTime::createFromFormat('H:i:s', '20:00:00');
-        $checkTime = \DateTime::createFromFormat('H:i:s', date('H:i:s', $timestamp));
-
-        return $checkTime >= $startTime && $checkTime <= $endTime;
-    }
 
     /**
      * Check recur duration
@@ -69,7 +43,7 @@ class EventsController
     }
 
     /**
-     * Get recurent events timestamps
+     * Get recurrent events timestamps
      */
     private function getRecurTimestamps($startTime, $endTime, $recurType, $recurDuration)
     {
@@ -131,7 +105,6 @@ class EventsController
     public function __construct()
     {
         $this->eventsModel = new EventsModel();
-        $this->usersModel = new UsersModel();
     }
 
     /**
@@ -192,10 +165,10 @@ class EventsController
     {   
         $validator = Validator::make([
             'description' => "required|min_length:5",
-            'user_id' => "required|exists:users:id",
+            'user_id' => "required|exists_soft:users:id:is_active",
             'room_id' => "required|exists:rooms:id",
-            'start_time' => "required|integer",
-            'end_time' => "required|integer",
+            'start_time' => "required|integer|ts_not_in_past|ts_not_weekend|ts_in_hours_range:(08:00:00, 20:00:00)",
+            'end_time' => "required|integer|ts_bigger_than:start_time|ts_bigger_min:start_time:1800|ts_bigger_max:start_time:43200|ts_not_weekend|ts_in_hours_range:(08:00:00, 20:00:00)",
             'recur_type' => "included:(weekly, bi-weekly, monthly)",
             'recur_duration' => "required_with:recur_type|integer|min:1|max:4"
         ]);
@@ -216,17 +189,7 @@ class EventsController
         $recurType = Input::get('recur_type');
         $recurDuration = Input::get('recur_duration');
 
-        $user = $this->usersModel->getUsers($userId);
         $authUser = Auth::user();
-
-        // Check if user that want to own event is soft deleted
-        if (count($user) === 0)
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['user_id' => ["User_id field value doesn't exists in database."]]
-            ], 422);
-        }
 
         // Check if not admin user want to create event for another user
         if (+$authUser['id'] !== +$userId
@@ -235,78 +198,6 @@ class EventsController
             return View::render([
                 'text' => 'The credentials you supplied were not correct.',
                 'data' => ['user_id' => ["User_id field doesn't equals id of authenticated user."]]
-            ], 422);
-        }
-
-        // Check event start time is not in past
-        if ($startTime < time())
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['start_time' => ["Start_time field timestamp can't be in past."]]
-            ], 422);
-        }
-
-        // Check event end time greater than event start time
-        if ($endTime < $startTime)
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['end_time' => ["End_time field timestamp can't be less than start_time."]]
-            ], 422);
-        }
-
-        // Check event duration min 30 min
-        if ($endTime - $startTime < 1800)
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['end_time' => ["End_time field timestamp must be greater than start_time for min 30 minutes."]]
-            ], 422);
-        }
-
-        // Check event duration max 12 hours
-        if ($endTime - $startTime > 43200)
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['end_time' => ["End_time field timestamp must be greater than start_time for max 12 hours."]]
-            ], 422);
-        }
-
-        // Check event start to be working day
-        if ($this->isWeekend($startTime))
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['start_time' => ["Start_time field timestamp can't be a weekend."]]
-            ], 422);
-        }
-
-        // Check event end to be working day
-        if ($this->isWeekend($endTime))
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['end_time' => ["End_time field timestamp can't be a weekend."]]
-            ], 422);
-        }
-
-        // Check event start is in working hours range
-        if (!$this->isWorkingHours($startTime))
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['start_time' => ["Start_time field timestamp must be between 08:00 and 20:00."]]
-            ], 422);
-        }
-
-        // Check event end is in working hours range
-        if (!$this->isWorkingHours($endTime))
-        {
-            return View::render([
-                'text' => 'The credentials you supplied were not correct.',
-                'data' => ['end_time' => ["End_time field timestamp must be between 08:00 and 20:00."]]
             ], 422);
         }
 
