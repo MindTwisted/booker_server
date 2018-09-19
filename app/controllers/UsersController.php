@@ -43,6 +43,13 @@ class UsersController
     {
         $user = $this->usersModel->getUsers($id);
 
+        if (count($user) === 0)
+        {
+            return View::render([
+                'text' => "Not found."
+            ], 404);
+        }
+
         return View::render([
             'data' => $user
         ]);
@@ -98,6 +105,15 @@ class UsersController
             ], 422);
         }
 
+        $user = $this->usersModel->getUsers($id);
+
+        if (count($user) === 0)
+        {
+            return View::render([
+                'text' => "Not found."
+            ], 404);
+        }
+
         $name = Input::get('name');
         $email = Input::get('email');
         $password = Input::get('password');
@@ -120,6 +136,17 @@ class UsersController
                 'text' => 'User can\'t delete himself.'
             ], 409);
         }
+
+        $user = $this->usersModel->getUsers($id);
+
+        if (count($user) === 0)
+        {
+            return View::render([
+                'text' => "Not found."
+            ], 404);
+        }
+
+        // TODO delete coming events
 
         $this->usersModel->deleteUser($id);
 

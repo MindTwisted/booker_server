@@ -7,16 +7,22 @@ class UsersModel extends Model
     /**
      * Get users from database
      */
-    public function getUsers($id = null)
+    public function getUsers($id = null, $onlyActive = true)
     {
         $dbPrefix = self::$dbPrefix;
 
         $users = self::$builder->table("{$dbPrefix}users")
-            ->fields(['id', 'name', 'email', 'role']);
+            ->fields(['id', 'name', 'email', 'role', 'is_active'])
+            ->where(['1', '=', '1']);
+
+        if ($onlyActive)
+        {
+            $users = $users->andWhere(['is_active', '=', '1']);
+        }
         
         if (null !== $id)
         {
-            $users = $users->where(['id', '=', $id])->limit(1);
+            $users = $users->andWhere(['id', '=', $id])->limit(1);
         }
             
         $users = $users->select()->run();
@@ -71,9 +77,11 @@ class UsersModel extends Model
         $dbPrefix = self::$dbPrefix;
 
         self::$builder->table("{$dbPrefix}users")
+            ->fields(['is_active'])
+            ->values([0])
             ->where(['id', '=', $id])
             ->limit(1)
-            ->delete()
+            ->update()
             ->run();
     }
 }
