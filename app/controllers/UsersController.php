@@ -61,9 +61,9 @@ class UsersController
     public function store()
     {    
         $validator = Validator::make([
-            'name' => "required|minLength:6",
+            'name' => "required|min_length:6",
             'email' => "required|email|unique:users:email",
-            'password' => "required|minLength:6"
+            'password' => "required|min_length:6"
         ]);
 
         if ($validator->fails())
@@ -92,9 +92,9 @@ class UsersController
     public function update($id)
     {
         $validator = Validator::make([
-            'name' => "required|minLength:6",
+            'name' => "required|min_length:6",
             'email' => "required|email|unique:users:email:$id",
-            'password' => "minLength:6"
+            'password' => "min_length:6"
         ]);
 
         if ($validator->fails())

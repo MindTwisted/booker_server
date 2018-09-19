@@ -137,6 +137,15 @@ Router::add('events.show', [
     ]
 ]);
 
+Router::add('events.store', [
+    'url' => '/api/events',
+    'method' => 'POST',
+    'controller' => ['app\controllers\EventsController', 'store'],
+    'filters' => [
+        'permission' => 'isAuth'
+    ]
+]);
+
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUrl = '/' . implode('/', array_slice(explode('/', explode('?', $_SERVER['REQUEST_URI'])[0]), 3));
 

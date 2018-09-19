@@ -30,6 +30,10 @@ class Validator
             'method' => 'checkRequired',
             'message' => 'requiredMessage',
         ],
+        "/^required_with:([a-zA-Z0-9\-\_]+)$/" => [
+            'method' => 'checkRequiredWith',
+            'message' => 'requiredWithMessage',
+        ],
         "/^numeric$/" => [
             'method' => 'checkNumeric',
             'message' => 'numericMessage',
@@ -46,7 +50,7 @@ class Validator
             'method' => 'checkMax',
             'message' => 'maxMessage',
         ],
-        "/^minLength:([0-9]+)$/" => [
+        "/^min_length:([0-9]+)$/" => [
             'method' => 'checkMinLength',
             'message' => 'minLengthMessage',
         ],
@@ -76,6 +80,14 @@ class Validator
      * Generate message for required rule failure
      */
     private static function requiredMessage($field)
+    {
+        return "$field field is required.";
+    }
+
+    /**
+     * Generate message for required_with rule failure
+     */
+    private static function requiredWithMessage($field)
     {
         return "$field field is required.";
     }
@@ -171,6 +183,19 @@ class Validator
         }
 
         return true;
+    }
+
+     /**
+     * Required_with rule check
+     */
+    private static function checkRequiredWith($field, $requiredField)
+    {
+        if (!self::checkRequired(Input::get($requiredField)))
+        {
+            return true;
+        }
+
+        return self::checkRequired($field);
     }
 
     /**
@@ -385,23 +410,14 @@ class Validator
      */
     private static function checkIncluded($field, $list)
     {
-        if ($field)
+        if (empty($field) && $field !== '0')
         {
-            $isIncluded = false;
-            $list = explode(',', $list);
-
-            foreach ($list as $item)
-            {
-                if ($field === trim($item))
-                {
-                    $isIncluded = true;
-                }
-            }
-
-            return $isIncluded;
+            return true;
         }
 
-        return false;
+        $list = array_map('trim', explode(',', $list));
+
+        return in_array($field, $list);
     }
 
     /**

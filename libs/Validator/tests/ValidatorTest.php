@@ -270,7 +270,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $validator = Validator::make(
             [
-                'stringLengthFive' => 'minLength:5',
+                'stringLengthFive' => 'min_length:5',
             ]
         );
 
@@ -286,7 +286,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $validator = Validator::make(
             [
-                'stringLengthFive' => 'minLength:6',
+                'stringLengthFive' => 'min_length:6',
             ]
         );
 
@@ -476,7 +476,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $validator = Validator::make(
             [
-                'notEmptyName' => 'required|minLength:20|numeric|email|unique:authors:first_name',
+                'notEmptyName' => 'required|min_length:20|numeric|email|unique:authors:first_name',
             ]
         );
 
@@ -496,7 +496,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
                 'notEmptyName' => 'john@example.com'
             ],
             [
-                'notEmptyName' => 'required|minLength:20|numeric|email|unique:authors:first_name',
+                'notEmptyName' => 'required|min_length:20|numeric|email|unique:authors:first_name',
             ]
         );
 

@@ -96,6 +96,7 @@ class Auth
         $user = self::$builder->table(self::$dbPrefix . 'users')
                     ->fields(['*'])
                     ->where(['email', '=', $email])
+                    ->andWhere(['is_active', '=', '1'])
                     ->limit(1)
                     ->select()
                     ->run();
@@ -155,6 +156,7 @@ class Auth
         $user = self::$builder->table($usersTable)
                     ->fields(['id', 'name', 'email', 'role'])
                     ->where(['id', '=', $userId])
+                    ->andWhere(['is_active', '=', '1'])
                     ->select()
                     ->run();
 
