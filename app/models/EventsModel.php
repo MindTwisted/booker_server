@@ -84,4 +84,28 @@ class EventsModel extends Model
 
         return $events;
     }
+
+    /**
+     * Add event into database
+     */
+    public function addEvent($userId, $roomId, $description, $timestamps)
+    {
+        $dbPrefix = self::$dbPrefix;
+
+        $sqlQuery = "
+            SELECT *
+            FROM {$dbPrefix}events
+        ";
+
+        $events = self::$builder->raw($sqlQuery);
+        $events = $events->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $events;
+
+        // return self::$builder->table("{$dbPrefix}rooms")
+        //             ->fields(['name'])
+        //             ->values([$name])
+        //             ->insert()
+        //             ->run();
+    }
 }
