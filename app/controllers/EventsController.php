@@ -50,7 +50,7 @@ class EventsController
             $localST = $startTime;
             $localET = $endTime;
 
-            for ($i = 2; $i <= $recurDuration; $i += 2)
+            for ($i = 1; $i <= $recurDuration; $i++)
             {
                 $localST = strtotime('+2 week', $localST);
                 $localET = strtotime('+2 week', $localET);

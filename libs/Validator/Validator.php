@@ -333,7 +333,7 @@ class Validator
 
         if ('bi-weekly' === $recurType)
         {
-            return "Bi-weekly duration must be even number.";   
+            return "Bi-weekly duration can't be bigger than 2.";   
         }
 
         if ('monthly' === $recurType)
@@ -788,7 +788,7 @@ class Validator
         }
 
         if ('bi-weekly' === $recurType 
-            && $field % 2 !== 0)
+            && $field > 2)
         {
             return false;   
         }
