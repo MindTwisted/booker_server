@@ -12,7 +12,13 @@ class EventsModel extends Model
         $dbPrefix = self::$dbPrefix;
 
         $sqlQuery = "
-            SELECT *
+            SELECT 
+                id,
+                room_id,
+                user_id,
+                description, 
+                UNIX_TIMESTAMP(start_time) - 1 as start_time,
+                UNIX_TIMESTAMP(end_time) + 1 as end_time
             FROM {$dbPrefix}events
             WHERE room_id = '$roomId' AND (
         ";
@@ -152,6 +158,28 @@ class EventsModel extends Model
             ->fields($fields)
             ->values(...$values)
             ->insert()
+            ->run();
+    }
+
+    /**
+     * Update single event in database
+     */
+    public function updateSingleEvent($id, $userId, $roomId, $description, $timestamp)
+    {
+        $dbPrefix = self::$dbPrefix;
+
+        $fields = ['description', 'start_time', 'end_time', 'user_id', 'room_id', 'recur_id'];
+
+        $startTime = date('Y-m-d H:i:s', $timestamp['startTime'] + 1);
+        $endTime = date('Y-m-d H:i:s', $timestamp['endTime'] - 1);
+
+        $values = [$description, $startTime, $endTime, $userId, $roomId, null];
+
+        self::$builder->table("{$dbPrefix}events")
+            ->fields($fields)
+            ->values($values)
+            ->where(['id', '=', $id])
+            ->update()
             ->run();
     }
 }

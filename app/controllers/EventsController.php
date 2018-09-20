@@ -208,18 +208,22 @@ class EventsController
     
             $events = $this->eventsModel->getEventsByTimestamps($roomId, $eventsTimestamps);
 
-            if (count($events) > 0)
+            if (count($events) > 0 && +$events[0]['id'] !== +$id)
             {
                 return View::render([
                     'text' => "Room with id '$roomId' is not available at the specified time."
                 ], 422);
             }
 
-            $this->eventsModel->updateSingleEvent($userId, $roomId, $description, $eventsTimestamps);
+            $this->eventsModel->updateSingleEvent($id, $userId, $roomId, $description, $eventsTimestamps[0]);
+
+            return View::render([
+                'text' => "Event in room with id '$roomId' was successfully updated."
+            ]);
         }
 
-        return View::render([
-            'text' => "Events in room with id '$roomId' was successfully updated."
-        ]);
+        dd('stop');
+
+        
     }
 }
