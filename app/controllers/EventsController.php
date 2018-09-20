@@ -142,17 +142,15 @@ class EventsController
         
         $isEventsAdded = $this->eventsModel->addEvent($userId, $roomId, $description, $eventsTimestamps);
         
-        dd($isEventsAdded);
+        if (!$isEventsAdded)
+        {
+            return View::render([
+                'text' => "Room with id '$roomId' is not available at the specified time."
+            ], 422);
+        }
 
-        // TODO check room availability
-
-        
-
-        // $id = $this->roomsModel->addRoom($name);
-
-        // return View::render([
-        //     'text' => "Room '$name' was successfully added.",
-        //     'data' => ['id' => $id]
-        // ]);
+        return View::render([
+            'text' => "Events in room with id '$roomId' was successfully added."
+        ]);
     }
 }

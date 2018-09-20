@@ -5,6 +5,36 @@ namespace app\models;
 class EventsModel extends Model
 {
     /**
+     * Get events within provided timestamps
+     */
+    private function getEventsByTimestamps($roomId, $timestamps)
+    {
+        $dbPrefix = self::$dbPrefix;
+
+        $sqlQuery = "
+            SELECT *
+            FROM {$dbPrefix}events
+            WHERE room_id = '$roomId' AND (
+        ";
+
+        foreach ($timestamps as $ts)
+        {
+            $startTime = date('Y-m-d H:i:s', $ts['startTime']);
+            $endTime = date('Y-m-d H:i:s', $ts['endTime']);
+
+            $sqlQuery .= "(start_time > '$startTime' AND start_time < '$endTime') OR (end_time > '$startTime' AND end_time < '$endTime') OR ";
+        }
+
+        $sqlQuery = trim($sqlQuery, 'OR ');
+        $sqlQuery .= ")";
+        
+        $events = self::$builder->raw($sqlQuery);
+        $events = $events->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $events;
+    }
+
+    /**
      * Get events from database
      */
     public function getEvents($id = null, $filters = [])
@@ -92,15 +122,14 @@ class EventsModel extends Model
     {
         $dbPrefix = self::$dbPrefix;
 
-        $sqlQuery = "
-            SELECT *
-            FROM {$dbPrefix}events
-        ";
+        $events = $this->getEventsByTimestamps($roomId, $timestamps);
 
-        $events = self::$builder->raw($sqlQuery);
-        $events = $events->fetchAll(\PDO::FETCH_ASSOC);
+        if (count($events) > 0)
+        {
+            return false;
+        }
 
-        return $events;
+        return true;
 
         // return self::$builder->table("{$dbPrefix}rooms")
         //             ->fields(['name'])
