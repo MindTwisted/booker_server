@@ -54,8 +54,8 @@ class EventsModel extends Model
                     "{$eventsTable}.id", 
                     "{$eventsTable}.recur_id",
                     "{$eventsTable}.description", 
-                    "UNIX_TIMESTAMP({$eventsTable}.start_time) as start_time", 
-                    "UNIX_TIMESTAMP({$eventsTable}.end_time) as end_time", 
+                    "UNIX_TIMESTAMP({$eventsTable}.start_time) - 1 as start_time", 
+                    "UNIX_TIMESTAMP({$eventsTable}.end_time) + 1 as end_time", 
                     "UNIX_TIMESTAMP({$eventsTable}.created_at) as created_at",
                     "GROUP_CONCAT(DISTINCT {$roomsTable}.id, '$separator', {$roomsTable}.name) AS room",
                     "GROUP_CONCAT(DISTINCT {$usersTable}.id, '$separator', {$usersTable}.name, '$separator', {$usersTable}.email) AS user"
@@ -135,8 +135,8 @@ class EventsModel extends Model
 
         foreach ($timestamps as $ts)
         {
-            $startTime = date('Y-m-d H:i:s', $ts['startTime']);
-            $endTime = date('Y-m-d H:i:s', $ts['endTime']);
+            $startTime = date('Y-m-d H:i:s', $ts['startTime'] + 1);
+            $endTime = date('Y-m-d H:i:s', $ts['endTime'] - 1);
 
             $currentValue = [$description, $startTime, $endTime, $userId, $roomId];
 
