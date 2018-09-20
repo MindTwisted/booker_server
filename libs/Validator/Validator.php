@@ -4,6 +4,7 @@ namespace libs\Validator;
 
 use libs\QueryBuilder\src\QueryBuilder;
 use libs\Input\Input;
+use libs\Auth;
 
 class Validator
 {
@@ -101,6 +102,14 @@ class Validator
         "/^ts_bigger_max:([a-zA-Z0-9\-\_]+):([a-zA-Z0-9\-\_]+)$/" => [
             'method' => 'checkTsBiggerMax',
             'message' => 'tsBiggerMaxMessage',
+        ],
+        "/^auth_user:([a-zA-Z0-9\-\_]+):([a-zA-Z0-9\-\_]+)$/" => [
+            'method' => 'checkAuthUser',
+            'message' => 'authUserMessage',
+        ],
+        "/^recur_duration:([a-zA-Z0-9\-\_]+)$/" => [
+            'method' => 'checkRecurDuration',
+            'message' => 'recurDurationMessage',
         ],
     ];
 
@@ -291,6 +300,32 @@ class Validator
         $differenceFormatted = self::formatTime($difference);
 
         return "$field timestamp can be bigger than $secondField timestamp for max $differenceFormatted.";
+    }
+
+    /**
+     * Generate message for authUser rule failure
+     */
+    private static function authUserMessage($field, $authField)
+    {
+        return "$field field doesn't equals $authField of authenticated user.";
+    }
+
+    /**
+     * Generate message for recurDuration rule failure
+     */
+    private static function recurDurationMessage($field, $secondField)
+    {
+        $recurType = Input::get($secondField);
+
+        if ('bi-weekly' === $recurType)
+        {
+            return "Bi-weekly duration must be even number.";   
+        }
+
+        if ('monthly' === $recurType)
+        {
+            return "Monthly duration can't be bigger than 1.";   
+        }
     }
 
     /**
@@ -675,6 +710,58 @@ class Validator
         }
 
         return (+$field - +Input::get($secondField)) <= $difference;
+    }
+
+    /**
+     * AuthUser rule check
+     */
+    private static function checkAuthUser($field, $authField, $exceptRole)
+    {
+        $authUser = Auth::user();
+
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        if ($authUser['role'] === 'admin')
+        {
+            return true;
+        }
+
+        return +$authUser[$authField] === +$field;
+    }
+
+     /**
+     * RecurDuration rule check
+     */
+    private static function checkRecurDuration($field, $secondField)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+
+        $recurType = Input::get($secondField);
+
+        if (null === $recurType)
+        {
+            return true;
+        }
+
+        if ('bi-weekly' === $recurType 
+            && $field % 2 !== 0)
+        {
+            return false;   
+        }
+
+        if ('monthly' === $recurType
+            && $field > 1)
+        {
+            return false;   
+        }
+
+        return true;
     }
 
     /**

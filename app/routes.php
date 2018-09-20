@@ -34,7 +34,7 @@ Router::add('users.show', [
     'controller' => ['app\controllers\UsersController', 'show'],
     'filters' => [
         'permission' => 'isAdmin',
-        'paramValidation' => 'exists:users:id'
+        'paramValidation' => 'exists_soft:users:id:is_active'
     ]
 ]);
 
@@ -53,7 +53,7 @@ Router::add('users.update', [
     'controller' => ['app\controllers\UsersController', 'update'],
     'filters' => [
         'permission' => 'isAdmin',
-        'paramValidation' => 'exists:users:id'
+        'paramValidation' => 'exists_soft:users:id:is_active'
     ]
 ]);
 
@@ -63,7 +63,7 @@ Router::add('users.delete', [
     'controller' => ['app\controllers\UsersController', 'delete'],
     'filters' => [
         'permission' => 'isAdmin',
-        'paramValidation' => 'exists:users:id'
+        'paramValidation' => 'exists_soft:users:id:is_active'
     ]
 ]);
 
