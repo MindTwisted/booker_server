@@ -146,6 +146,16 @@ Router::add('events.store', [
     ]
 ]);
 
+Router::add('events.update', [
+    'url' => '/api/events/:id',
+    'method' => 'PUT',
+    'controller' => ['app\controllers\EventsController', 'update'],
+    'filters' => [
+        'permission' => 'isAuth',
+        'paramValidation' => 'exists:events:id'
+    ]
+]);
+
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUrl = '/' . implode('/', array_slice(explode('/', explode('?', $_SERVER['REQUEST_URI'])[0]), 3));
 

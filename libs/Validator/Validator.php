@@ -71,6 +71,10 @@ class Validator
             'method' => 'checkExistsSoft',
             'message' => 'existsSoftMessage',
         ],
+        "/^exists_spec:([a-zA-Z0-9\-\_]+):([a-zA-Z0-9\-\_\=]+):([a-zA-Z0-9\-\_]+)$/" => [
+            'method' => 'checkExistsSpec',
+            'message' => 'existsSpecMessage',
+        ],
         "/^included:\(([a-zA-Z0-9\-\_\,\s]+)\)$/" => [
             'method' => 'checkIncluded',
             'message' => 'includedMessage',
@@ -230,6 +234,16 @@ class Validator
     private static function existsSoftMessage($field)
     {
         return "$field field value doesn't exists in database.";
+    }
+
+    /**
+     * Generate message for existsSpec rule failure
+     */
+    private static function existsSpecMessage($field, $table, $searchField)
+    {
+        $fieldValue = Input::get($field);
+
+        return "$field with value $fieldValue doesn't exists in table $table ($searchField).";
     }
 
     /**
@@ -598,6 +612,30 @@ class Validator
         $result = self::$builder->raw($sqlQuery, $field)->fetchAll(\PDO::FETCH_ASSOC);
 
         return count($result) === count($field);
+    }
+
+    /**
+     * ExistsSpec rule check
+     */
+    private static function checkExistsSpec($field, $table, $searchField, $existsField)
+    {
+        if (empty($field) && $field !== '0')
+        {
+            return true;
+        }
+        
+        list($sField, $sValue) = explode('=', $searchField);
+        $table = self::$dbPrefix . $table;
+ 
+        $result = self::$builder->table($table)
+            ->fields(['*'])
+            ->where([$sField, '=', $sValue])
+            ->andWhere([$existsField, '=', $field])
+            ->limit(1)
+            ->select()
+            ->run();
+        
+        return count($result) > 0;
     }
 
     /**
