@@ -41,6 +41,32 @@ class EventsModel extends Model
     }
 
     /**
+     * Get events frame with provided recur id started from id
+     */
+    public function getEventsByRecurId($id, $recurId)
+    {
+        $dbPrefix = self::$dbPrefix;
+
+        $eventsTable = "{$dbPrefix}events";
+
+        $events = self::$builder->table($eventsTable)
+            ->fields(
+                [
+                    'id',
+                    'recur_id', 
+                    'description',
+                    "UNIX_TIMESTAMP(start_time) - 1 as start_time",
+                    "UNIX_TIMESTAMP(end_time) + 1 as end_time"
+                ])
+            ->where(['recur_id', '=', $recurId])
+            ->andWhere(['id', '>=', $id])
+            ->select()
+            ->run();
+
+        return $events;
+    }
+
+    /**
      * Get events from database
      */
     public function getEvents($id = null, $filters = [])
@@ -181,5 +207,31 @@ class EventsModel extends Model
             ->where(['id', '=', $id])
             ->update()
             ->run();
+    }
+
+    /**
+     * Update multiple events in database
+     */
+    public function updateMultipleEvents($userId, $roomId, $description, $oldEvents, $updatedTimestamps)
+    {
+        $dbPrefix = self::$dbPrefix;
+        $recurId = time();
+        $fields = ['description', 'start_time', 'end_time', 'user_id', 'room_id', 'recur_id'];
+
+        foreach ($oldEvents as $key => $value)
+        {
+            $startTime = date('Y-m-d H:i:s', $updatedTimestamps[$key]['startTime'] + 1);
+            $endTime = date('Y-m-d H:i:s', $updatedTimestamps[$key]['endTime'] - 1);
+            $values = [$description, $startTime, $endTime, $userId, $roomId, $recurId];
+
+            self::$builder->table("{$dbPrefix}events")
+                ->fields($fields)
+                ->values($values)
+                ->where(['id', '=', $value['id']])
+                ->update()
+                ->run();
+        }
+
+        return $recurId;
     }
 }

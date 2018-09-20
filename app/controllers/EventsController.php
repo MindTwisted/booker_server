@@ -74,6 +74,24 @@ class EventsController
     }
 
     /**
+     * Update recur events timestamps
+     */
+    private function updateRecurTimestamps($events, $diffStart, $diffEnd)
+    {
+        $results = [];
+        
+        foreach ($events as $event)
+        {
+            $results[] = [
+                'startTime' => $event['start_time'] + $diffStart,
+                'endTime' => $event['end_time'] + $diffEnd
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -145,7 +163,7 @@ class EventsController
         {
             return View::render([
                 'text' => "Room with id '$roomId' is not available at the specified time."
-            ], 422);
+            ], 409);
         }
 
         $this->eventsModel->addEvent($userId, $roomId, $description, $eventsTimestamps);
@@ -187,7 +205,7 @@ class EventsController
         $event = $this->eventsModel->getEvents($id)[0];
         $authUser = Auth::user();
 
-        if ('admin' !== $authUser['role'] 
+        if ('admin' !== $authUser['role']
             && +$authUser['id'] !== +$event['user']['id'])
         {
             return View::render([
@@ -212,7 +230,7 @@ class EventsController
             {
                 return View::render([
                     'text' => "Room with id '$roomId' is not available at the specified time."
-                ], 422);
+                ], 409);
             }
 
             $this->eventsModel->updateSingleEvent($id, $userId, $roomId, $description, $eventsTimestamps[0]);
@@ -222,8 +240,29 @@ class EventsController
             ]);
         }
 
-        dd('stop');
+        $oldEvents = $this->eventsModel->getEventsByRecurId($id, $recurId);
+        $diffStart = $startTime - $event['start_time'];
+        $diffEnd = $endTime - $event['end_time'];
+        $updatedTimestamps = $this->updateRecurTimestamps($oldEvents, $diffStart, $diffEnd);
+        $events = $this->eventsModel->getEventsByTimestamps($roomId, $updatedTimestamps);
 
+        dd($oldEvents, $events);
+        // TODO fix events change content without change timestamps
+        // TODO add delete events method
+        // TODO delete future events of deleted user
+
+        if (count($events) > 0 && count($events) !== count($oldEvents))
+        {
+            return View::render([
+                'text' => "Room with id '$roomId' is not available at the specified time."
+            ], 409);
+        }
+
+        $recurId = $this->eventsModel->updateMultipleEvents($userId, $roomId, $description, $oldEvents, $updatedTimestamps);
         
+        return View::render([
+            'text' => "Events in room with id '$roomId' was successfully updated.",
+            'data' => ['recurId' => $recurId]
+        ]);
     }
 }
