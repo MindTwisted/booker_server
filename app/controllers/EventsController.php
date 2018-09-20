@@ -139,16 +139,17 @@ class EventsController
         $recurDuration = Input::get('recur_duration');
 
         $eventsTimestamps = $this->getRecurTimestamps($startTime, $endTime, $recurType, $recurDuration);
-        
-        $isEventsAdded = $this->eventsModel->addEvent($userId, $roomId, $description, $eventsTimestamps);
-        
-        if (!$isEventsAdded)
+        $events = $this->eventsModel->getEventsByTimestamps($roomId, $eventsTimestamps);
+
+        if (count($events) > 0)
         {
             return View::render([
                 'text' => "Room with id '$roomId' is not available at the specified time."
             ], 422);
         }
 
+        $this->eventsModel->addEvent($userId, $roomId, $description, $eventsTimestamps);
+        
         return View::render([
             'text' => "Events in room with id '$roomId' was successfully added."
         ]);

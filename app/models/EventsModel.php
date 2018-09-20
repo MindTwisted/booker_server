@@ -7,7 +7,7 @@ class EventsModel extends Model
     /**
      * Get events within provided timestamps
      */
-    private function getEventsByTimestamps($roomId, $timestamps)
+    public function getEventsByTimestamps($roomId, $timestamps)
     {
         $dbPrefix = self::$dbPrefix;
 
@@ -22,7 +22,7 @@ class EventsModel extends Model
             $startTime = date('Y-m-d H:i:s', $ts['startTime']);
             $endTime = date('Y-m-d H:i:s', $ts['endTime']);
 
-            $sqlQuery .= "(start_time > '$startTime' AND start_time < '$endTime') OR (end_time > '$startTime' AND end_time < '$endTime') OR ";
+            $sqlQuery .= "(start_time >= '$startTime' AND start_time <= '$endTime') OR (end_time >= '$startTime' AND end_time <= '$endTime') OR ";
         }
 
         $sqlQuery = trim($sqlQuery, 'OR ');
@@ -122,19 +122,36 @@ class EventsModel extends Model
     {
         $dbPrefix = self::$dbPrefix;
 
-        $events = $this->getEventsByTimestamps($roomId, $timestamps);
+        $fields = ['description', 'start_time', 'end_time', 'user_id', 'room_id'];
+        $values = [];
 
-        if (count($events) > 0)
+        $isRecur = count($timestamps) > 1;
+        $recurId = time();
+        
+        if ($isRecur)
         {
-            return false;
+            $fields[] = 'recur_id';
         }
 
-        return true;
+        foreach ($timestamps as $ts)
+        {
+            $startTime = date('Y-m-d H:i:s', $ts['startTime']);
+            $endTime = date('Y-m-d H:i:s', $ts['endTime']);
 
-        // return self::$builder->table("{$dbPrefix}rooms")
-        //             ->fields(['name'])
-        //             ->values([$name])
-        //             ->insert()
-        //             ->run();
+            $currentValue = [$description, $startTime, $endTime, $userId, $roomId];
+
+            if ($isRecur)
+            {
+                $currentValue[] = $recurId;
+            }
+
+            $values[] = $currentValue;
+        }
+
+        self::$builder->table("{$dbPrefix}events")
+            ->fields($fields)
+            ->values(...$values)
+            ->insert()
+            ->run();
     }
 }
