@@ -261,4 +261,18 @@ class EventsModel extends Model
             ->delete()
             ->run();
     }
+
+    /**
+     * Delete future events of user
+     */
+    public function deleteFutureEventsOfUser($userId)
+    {
+        $dbPrefix = self::$dbPrefix;
+
+        self::$builder->table("{$dbPrefix}events")
+            ->where(['user_id', '=', $userId])
+            ->andWhere(['start_time', '>', date('Y-m-d H:i:s', time())])
+            ->delete()
+            ->run();
+    }
 }

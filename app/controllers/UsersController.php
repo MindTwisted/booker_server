@@ -8,6 +8,7 @@ use libs\Validator\Validator;
 use libs\Input\Input;
 
 use app\models\UsersModel;
+use app\models\EventsModel;
 
 class UsersController
 {
@@ -17,11 +18,17 @@ class UsersController
     protected $usersModel;
 
     /**
+     * EventsModel instance
+     */
+    protected $eventsModel;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->usersModel = new UsersModel();
+        $this->eventsModel = new EventsModel();
     }
 
     /**
@@ -121,9 +128,8 @@ class UsersController
             ], 409);
         }
 
-        // TODO delete coming events
-
         $this->usersModel->deleteUser($id);
+        $this->eventsModel->deleteFutureEventsOfUser($id);
 
         return View::render([
             'text' => "User with id '$id' was successfully deleted."
