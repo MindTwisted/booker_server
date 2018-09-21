@@ -125,7 +125,7 @@ class UsersController
         {
             return View::render([
                 'text' => 'User can\'t delete himself.'
-            ], 409);
+            ], 403);
         }
 
         $this->usersModel->deleteUser($id);
