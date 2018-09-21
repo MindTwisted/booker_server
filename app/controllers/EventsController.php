@@ -220,7 +220,13 @@ class EventsController
             ], 403);
         }
 
-        if (null === $recurId)
+        if (null !== $recurId)
+        {
+            $oldEvents = $this->eventsModel->getEventsByRecurId($id, $recurId);
+        }
+
+        if (null === $recurId 
+            || (isset($oldEvents) && count($oldEvents) === 1))
         {
             $eventsTimestamps = [['startTime' => $startTime, 'endTime' => $endTime]];
     
@@ -240,18 +246,12 @@ class EventsController
             ]);
         }
 
-        $oldEvents = $this->eventsModel->getEventsByRecurId($id, $recurId);
         $diffStart = $startTime - $event['start_time'];
         $diffEnd = $endTime - $event['end_time'];
         $updatedTimestamps = $this->updateRecurTimestamps($oldEvents, $diffStart, $diffEnd);
         $events = $this->eventsModel->getEventsByTimestamps($roomId, $updatedTimestamps);
 
-        dd($oldEvents, $events);
-        // TODO fix events change content without change timestamps
-        // TODO add delete events method
-        // TODO delete future events of deleted user
-
-        if (count($events) > 0 && count($events) !== count($oldEvents))
+        if (count($events) > 0 && +$events[0]['id'] !== +$id)
         {
             return View::render([
                 'text' => "Room with id '$roomId' is not available at the specified time."
@@ -263,6 +263,59 @@ class EventsController
         return View::render([
             'text' => "Events in room with id '$roomId' was successfully updated.",
             'data' => ['recurId' => $recurId]
+        ]);
+    }
+
+    /**
+     * Delete event with provided id
+     */
+    public function delete($id)
+    {
+        $validator = Validator::make([ 
+            'recur_id' => "exists_spec:events:id=$id:recur_id"
+        ]);
+
+        if ($validator->fails())
+        {
+            return View::render([
+                'text' => 'The credentials you supplied were not correct.',
+                'data' => $validator->errors()
+            ], 422);
+        }
+
+        $recurId = Input::get('recur_id');
+
+        $event = $this->eventsModel->getEvents($id)[0];
+        $authUser = Auth::user();
+
+        if ('admin' !== $authUser['role']
+            && +$authUser['id'] !== +$event['user']['id'])
+        {
+            return View::render([
+                'text' => "Permission denied."
+            ], 403);
+        }
+        
+        if ($event['start_time'] < time())
+        {
+            return View::render([
+                'text' => "Past events can't be deleted."
+            ], 403);
+        }
+
+        if (null === $recurId)
+        {
+            $this->eventsModel->deleteSingleEvent($id);
+
+            return View::render([
+                'text' => "Event with id '$id' was successfully deleted."
+            ]);
+        }
+
+        $this->eventsModel->deleteMultipleEvents($id, $recurId);
+
+        return View::render([
+            'text' => "Events with recur_id '$recurId' starts from id '$id' was successfully deleted."
         ]);
     }
 }

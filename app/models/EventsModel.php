@@ -234,4 +234,31 @@ class EventsModel extends Model
 
         return $recurId;
     }
+
+    /**
+     * Delete single event from database
+     */
+    public function deleteSingleEvent($id)
+    {
+        $dbPrefix = self::$dbPrefix;
+
+        self::$builder->table("{$dbPrefix}events")
+            ->where(['id', '=', $id])
+            ->delete()
+            ->run();
+    }
+
+    /**
+     * Delete multiple events from database
+     */
+    public function deleteMultipleEvents($id, $recurId)
+    {
+        $dbPrefix = self::$dbPrefix;
+
+        self::$builder->table("{$dbPrefix}events")
+            ->where(['recur_id', '=', $recurId])
+            ->andWhere(['id', '>=', $id])
+            ->delete()
+            ->run();
+    }
 }

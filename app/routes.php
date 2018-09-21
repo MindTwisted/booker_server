@@ -156,6 +156,16 @@ Router::add('events.update', [
     ]
 ]);
 
+Router::add('events.delete', [
+    'url' => '/api/events/:id',
+    'method' => 'DELETE',
+    'controller' => ['app\controllers\EventsController', 'delete'],
+    'filters' => [
+        'permission' => 'isAuth',
+        'paramValidation' => 'exists:events:id'
+    ]
+]);
+
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUrl = '/' . implode('/', array_slice(explode('/', explode('?', $_SERVER['REQUEST_URI'])[0]), 3));
 
