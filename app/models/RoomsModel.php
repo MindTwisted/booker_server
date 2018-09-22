@@ -7,21 +7,25 @@ class RoomsModel extends Model
     /**
      * Get rooms from database
      */
-    public function getRooms($id = null)
+    public function getRooms($id = null, $onlyActive = true)
     {
         $dbPrefix = self::$dbPrefix;
 
         $rooms = self::$builder->table("{$dbPrefix}rooms")
-            ->fields(['id', 'name']);
+            ->fields(['id', 'name', 'is_active'])
+            ->where(['1', '=', '1']);
+
+        if ($onlyActive)
+        {
+            $rooms = $rooms->andWhere(['is_active', '=', '1']);
+        }
 
         if (null !== $id)
         {
-            $rooms = $rooms->where(['id', '=', $id])->limit(1);
+            $rooms = $rooms->andWhere(['id', '=', $id])->limit(1);
         }
 
-        $rooms = $rooms->groupBy(['id'])
-            ->select()
-            ->run();
+        $rooms = $rooms->select()->run();
 
         return $rooms;
     }
@@ -64,9 +68,11 @@ class RoomsModel extends Model
         $dbPrefix = self::$dbPrefix;
 
         self::$builder->table("{$dbPrefix}rooms")
+            ->fields(['is_active'])
+            ->values([0])
             ->where(['id', '=', $id])
             ->limit(1)
-            ->delete()
+            ->update()
             ->run();
     }
 }

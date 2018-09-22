@@ -28,7 +28,8 @@ $builderMySQL->table("{$prefix}rooms")
       ->values(
           ['Boardroom 1'],
           ['Boardroom 2'],
-          ['Boardroom 3']
+          ['Boardroom 3'],
+          ['Boardroom 4']
         )
       ->insert()
       ->run();
@@ -38,6 +39,7 @@ $builderMySQL->table("{$prefix}events")
       ->fields(['description', 'start_time', 'end_time', 'user_id', 'room_id', 'recur_id', 'created_at'])
       ->values(
           ['Meeting', '2018-09-18 09:00:01', '2018-09-18 10:59:59', 2, 1, NULL, date('Y-m-d H:i:s', time() + 40000)],
+          ['Meeting', '2018-09-18 09:00:01', '2018-09-18 10:59:59', 2, 4, NULL, date('Y-m-d H:i:s', time() + 40000)],
           ['Meeting', '2018-09-27 10:30:01', '2018-09-27 11:29:59', 2, 1, NULL, date('Y-m-d H:i:s', time() + 82000)],
           ['Meeting', '2018-10-04 10:30:01', '2018-10-04 11:29:59', 2, 1, NULL, date('Y-m-d H:i:s', time() + 95000)],
           ['Meeting', '2018-10-11 10:30:01', '2018-10-11 11:29:59', 2, 1, NULL, date('Y-m-d H:i:s', time() + 105000)],

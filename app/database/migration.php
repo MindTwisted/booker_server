@@ -40,6 +40,7 @@ $builderMySQL->raw(
     "CREATE TABLE {$prefix}rooms (
                   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                   name VARCHAR(255) NOT NULL,
+                  is_active BOOLEAN DEFAULT 1,
                   UNIQUE (name)
             )"
 );

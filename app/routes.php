@@ -83,7 +83,7 @@ Router::add('rooms.show', [
     'controller' => ['app\controllers\RoomsController', 'show'],
     'filters' => [
         'permission' => 'isAuth',
-        'paramValidation' => 'exists:rooms:id'
+        'paramValidation' => 'exists_soft:rooms:id:is_active'
     ]
 ]);
 
@@ -103,7 +103,7 @@ Router::add('rooms.update', [
     'controller' => ['app\controllers\RoomsController', 'update'],
     'filters' => [
         'permission' => 'isAdmin',
-        'paramValidation' => 'exists:rooms:id'
+        'paramValidation' => 'exists_soft:rooms:id:is_active'
     ]
 ]);
 
@@ -113,7 +113,7 @@ Router::add('rooms.delete', [
     'controller' => ['app\controllers\RoomsController', 'delete'],
     'filters' => [
         'permission' => 'isAdmin',
-        'paramValidation' => 'exists:rooms:id'
+        'paramValidation' => 'exists_soft:rooms:id:is_active'
     ]
 ]);
 
