@@ -623,7 +623,7 @@ class Validator
         {
             return true;
         }
-        
+
         list($sField, $sValue) = explode('=', $searchField);
         $table = self::$dbPrefix . $table;
  
@@ -689,6 +689,11 @@ class Validator
             return true;
         }
 
+        if (!self::checkInteger($field)) 
+        {
+            return false;
+        }
+
         return date('N', $field) < 6;
     }
 
@@ -700,6 +705,11 @@ class Validator
         if (empty($field) && $field !== '0')
         {
             return true;
+        }
+
+        if (!self::checkInteger($field)) 
+        {
+            return false;
         }
 
         list($start, $end) = array_map('trim', explode(',', $range));
@@ -721,6 +731,11 @@ class Validator
             return true;
         }
 
+        if (!self::checkInteger($field)) 
+        {
+            return false;
+        }
+
         return +$field > +Input::get($secondField);
     }
 
@@ -734,6 +749,11 @@ class Validator
             return true;
         }
 
+        if (!self::checkInteger($field)) 
+        {
+            return false;
+        }
+
         return (+$field - +Input::get($secondField)) >= $difference;
     }
 
@@ -745,6 +765,11 @@ class Validator
         if (empty($field) && $field !== '0')
         {
             return true;
+        }
+
+        if (!self::checkInteger($field)) 
+        {
+            return false;
         }
 
         return (+$field - +Input::get($secondField)) <= $difference;

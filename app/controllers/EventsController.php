@@ -220,12 +220,12 @@ class EventsController
             ], 403);
         }
 
-        if (null !== $recurId)
+        if ($recurId)
         {
             $oldEvents = $this->eventsModel->getEventsByRecurId($id, $recurId);
         }
 
-        if (null === $recurId 
+        if (!$recurId 
             || (isset($oldEvents) && count($oldEvents) === 1))
         {
             $eventsTimestamps = [['startTime' => $startTime, 'endTime' => $endTime]];
