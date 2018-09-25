@@ -304,7 +304,7 @@ class EventsController
             ], 403);
         }
 
-        if (null === $recurId)
+        if (!$recurId)
         {
             $this->eventsModel->deleteSingleEvent($id);
 
