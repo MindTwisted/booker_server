@@ -242,7 +242,8 @@ class EventsController
             $this->eventsModel->updateSingleEvent($id, $userId, $roomId, $description, $eventsTimestamps[0]);
 
             return View::render([
-                'text' => "Event in room with id '$roomId' was successfully updated."
+                'text' => "Event in room with id '$roomId' was successfully updated.",
+                'data' => ['recurId' => null]
             ]);
         }
 
