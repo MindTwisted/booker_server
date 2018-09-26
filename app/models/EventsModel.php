@@ -193,14 +193,14 @@ class EventsModel extends Model
     /**
      * Update single event in database
      */
-    public function updateSingleEvent($id, $userId, $roomId, $description, $timestamp)
+    public function updateSingleEvent($id, $userId, $roomId, $description, $updatedTimestamp)
     {
         $dbPrefix = self::$dbPrefix;
 
         $fields = ['description', 'start_time', 'end_time', 'user_id', 'room_id', 'recur_id'];
 
-        $startTime = date('Y-m-d H:i:s', $timestamp['startTime'] + 1);
-        $endTime = date('Y-m-d H:i:s', $timestamp['endTime'] - 1);
+        $startTime = date('Y-m-d H:i:s', $updatedTimestamp['startTime'] + 1);
+        $endTime = date('Y-m-d H:i:s', $updatedTimestamp['endTime'] - 1);
 
         $values = [$description, $startTime, $endTime, $userId, $roomId, null];
 

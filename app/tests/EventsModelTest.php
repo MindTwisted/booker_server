@@ -214,4 +214,183 @@ class EventsModelTest extends TestCase
         $this->assertCount(6, $events);
     }
 
+    public function testAddSingleEvent()
+    {
+        $timestamps = [
+            [
+                'startTime' => strtotime('2018-09-27 08:00:00'),
+                'endTime' => strtotime('2018-09-27 12:00:00'),
+            ]
+        ];
+
+        $initialEvents = self::$eventsModel->getEvents();
+
+        $this->assertCount(16, $initialEvents);
+
+        self::$eventsModel->addEvent(1, 2, 'Single event', $timestamps);
+
+        $updatedEvents = self::$eventsModel->getEvents();
+
+        $this->assertCount(17, $updatedEvents);
+
+        $addedEvent = self::$eventsModel->getEvents(17);
+
+        $this->assertEquals('Single event', $addedEvent[0]['description']);
+        $this->assertEquals(1, $addedEvent[0]['user']['id']);
+        $this->assertEquals(2, $addedEvent[0]['room']['id']);
+    }
+
+    public function testAddMultipleEvents()
+    {
+        $timestamps = [
+            [
+                'startTime' => strtotime('2018-09-27 08:00:00'),
+                'endTime' => strtotime('2018-09-27 12:00:00'),
+            ],
+            [
+                'startTime' => strtotime('2018-10-27 08:00:00'),
+                'endTime' => strtotime('2018-10-27 12:00:00'),
+            ]
+        ];
+
+        $initialEvents = self::$eventsModel->getEvents();
+
+        $this->assertCount(17, $initialEvents);
+
+        self::$eventsModel->addEvent(1, 2, 'Multiple event', $timestamps);
+
+        $updatedEvents = self::$eventsModel->getEvents();
+
+        $this->assertCount(19, $updatedEvents);
+
+        $addedEvent1 = self::$eventsModel->getEvents(18);
+        $addedEvent2 = self::$eventsModel->getEvents(19);
+
+        $this->assertEquals('Multiple event', $addedEvent1[0]['description']);
+        $this->assertEquals(1, $addedEvent1[0]['user']['id']);
+        $this->assertEquals(2, $addedEvent1[0]['room']['id']);
+
+        $this->assertEquals('Multiple event', $addedEvent2[0]['description']);
+        $this->assertEquals(1, $addedEvent2[0]['user']['id']);
+        $this->assertEquals(2, $addedEvent2[0]['room']['id']);
+    }
+
+    public function testUpdateSingleEvent()
+    {
+        $initialStartTime = '2018-10-27 08:00:00';
+        $initialEndTime = '2018-10-27 12:00:00';
+
+        $updatedStartTime = '2018-11-27 08:00:00';
+        $updatedEndTime = '2018-11-27 12:00:00';
+
+        $updatedTimestamp = [
+            'startTime' => strtotime($updatedStartTime),
+            'endTime' => strtotime($updatedEndTime),
+        ];
+
+        $initialEvent = self::$eventsModel->getEvents(19);
+
+        $this->assertEquals($initialStartTime, date('Y-m-d H:i:s', $initialEvent[0]['start_time']));
+        $this->assertEquals($initialEndTime, date('Y-m-d H:i:s', $initialEvent[0]['end_time']));
+        $this->assertEquals('Multiple event', $initialEvent[0]['description']);
+        $this->assertEquals(1, $initialEvent[0]['user']['id']);
+        $this->assertEquals(2, $initialEvent[0]['room']['id']);
+
+        self::$eventsModel->updateSingleEvent(19, 2, 3, 'Updated single', $updatedTimestamp);
+
+        $updatedEvent = self::$eventsModel->getEvents(19);
+
+        $this->assertEquals($updatedStartTime, date('Y-m-d H:i:s', $updatedEvent[0]['start_time']));
+        $this->assertEquals($updatedEndTime, date('Y-m-d H:i:s', $updatedEvent[0]['end_time']));
+        $this->assertEquals('Updated single', $updatedEvent[0]['description']);
+        $this->assertEquals(2, $updatedEvent[0]['user']['id']);
+        $this->assertEquals(3, $updatedEvent[0]['room']['id']);
+    }
+
+    public function testUpdateMultipleEvents()
+    {
+        $initialStartTime1 = '2018-10-19 09:00:00';
+        $initialEndTime1 = '2018-10-19 11:00:00';
+
+        $initialStartTime2 = '2018-10-26 09:00:00';
+        $initialEndTime2 = '2018-10-26 11:00:00';
+
+        $initialStartTime3 = '2018-11-02 09:00:00';
+        $initialEndTime3 = '2018-11-02 11:00:00';
+
+        $updatedStartTime1 = '2018-11-27 08:00:00';
+        $updatedEndTime1 = '2018-11-27 12:00:00';
+
+        $updatedStartTime2 = '2018-12-07 08:00:00';
+        $updatedEndTime2 = '2018-12-07 12:00:00';
+
+        $updatedStartTime3 = '2018-12-27 08:00:00';
+        $updatedEndTime3 = '2018-12-27 12:00:00';
+
+        $updatedTimestamps = [
+            [
+                'startTime' => strtotime($updatedStartTime1),
+                'endTime' => strtotime($updatedEndTime1)
+            ],
+            [
+                'startTime' => strtotime($updatedStartTime2),
+                'endTime' => strtotime($updatedEndTime2)
+            ],
+            [
+                'startTime' => strtotime($updatedStartTime3),
+                'endTime' => strtotime($updatedEndTime3)
+            ]
+        ];
+
+        $initialEvent1 = self::$eventsModel->getEvents(14);
+        $initialEvent2 = self::$eventsModel->getEvents(15);
+        $initialEvent3 = self::$eventsModel->getEvents(16);
+
+        $this->assertEquals($initialStartTime1, date('Y-m-d H:i:s', $initialEvent1[0]['start_time']));
+        $this->assertEquals($initialEndTime1, date('Y-m-d H:i:s', $initialEvent1[0]['end_time']));
+        $this->assertEquals('Meeting', $initialEvent1[0]['description']);
+        $this->assertEquals(1, $initialEvent1[0]['user']['id']);
+        $this->assertEquals(2, $initialEvent1[0]['room']['id']);
+
+        $this->assertEquals($initialStartTime2, date('Y-m-d H:i:s', $initialEvent2[0]['start_time']));
+        $this->assertEquals($initialEndTime2, date('Y-m-d H:i:s', $initialEvent2[0]['end_time']));
+        $this->assertEquals('Meeting', $initialEvent2[0]['description']);
+        $this->assertEquals(1, $initialEvent2[0]['user']['id']);
+        $this->assertEquals(2, $initialEvent2[0]['room']['id']);
+
+        $this->assertEquals($initialStartTime3, date('Y-m-d H:i:s', $initialEvent3[0]['start_time']));
+        $this->assertEquals($initialEndTime3, date('Y-m-d H:i:s', $initialEvent3[0]['end_time']));
+        $this->assertEquals('Meeting', $initialEvent3[0]['description']);
+        $this->assertEquals(1, $initialEvent3[0]['user']['id']);
+        $this->assertEquals(2, $initialEvent3[0]['room']['id']);
+
+        $initialEvents = self::$eventsModel->getEventsByRecurId(14, 123456);
+
+        $this->assertCount(3, $initialEvents);
+
+        self::$eventsModel->updateMultipleEvents(2, 3, 'Updated multiple', $initialEvents, $updatedTimestamps);
+
+        $updatedEvent1 = self::$eventsModel->getEvents(14);
+        $updatedEvent2 = self::$eventsModel->getEvents(15);
+        $updatedEvent3 = self::$eventsModel->getEvents(16);
+
+        $this->assertEquals($updatedStartTime1, date('Y-m-d H:i:s', $updatedEvent1[0]['start_time']));
+        $this->assertEquals($updatedEndTime1, date('Y-m-d H:i:s', $updatedEvent1[0]['end_time']));
+        $this->assertEquals('Updated multiple', $updatedEvent1[0]['description']);
+        $this->assertEquals(2, $updatedEvent1[0]['user']['id']);
+        $this->assertEquals(3, $updatedEvent1[0]['room']['id']);
+
+        $this->assertEquals($updatedStartTime2, date('Y-m-d H:i:s', $updatedEvent2[0]['start_time']));
+        $this->assertEquals($updatedEndTime2, date('Y-m-d H:i:s', $updatedEvent2[0]['end_time']));
+        $this->assertEquals('Updated multiple', $updatedEvent2[0]['description']);
+        $this->assertEquals(2, $updatedEvent2[0]['user']['id']);
+        $this->assertEquals(3, $updatedEvent2[0]['room']['id']);
+
+        $this->assertEquals($updatedStartTime3, date('Y-m-d H:i:s', $updatedEvent3[0]['start_time']));
+        $this->assertEquals($updatedEndTime3, date('Y-m-d H:i:s', $updatedEvent3[0]['end_time']));
+        $this->assertEquals('Updated multiple', $updatedEvent3[0]['description']);
+        $this->assertEquals(2, $updatedEvent3[0]['user']['id']);
+        $this->assertEquals(3, $updatedEvent3[0]['room']['id']);
+    }
+
 }
