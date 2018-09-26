@@ -28,7 +28,10 @@ class EventsModel extends Model
             $startTime = date('Y-m-d H:i:s', $ts['startTime']);
             $endTime = date('Y-m-d H:i:s', $ts['endTime']);
 
-            $sqlQuery .= "(start_time >= '$startTime' AND start_time <= '$endTime') OR (end_time >= '$startTime' AND end_time <= '$endTime') OR ";
+            $sqlQuery .= "(start_time >= '$startTime' AND start_time <= '$endTime') OR
+                          (end_time >= '$startTime' AND end_time <= '$endTime') OR 
+                          ('$startTime' >= start_time AND '$startTime' <= end_time) OR
+                          ('$endTime' >= start_time AND '$endTime' <= end_time) OR";
         }
 
         $sqlQuery = trim($sqlQuery, 'OR ');
