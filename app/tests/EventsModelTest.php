@@ -242,6 +242,8 @@ class EventsModelTest extends TestCase
 
     public function testAddMultipleEvents()
     {
+        sleep(1);
+
         $timestamps = [
             [
                 'startTime' => strtotime('2018-09-27 08:00:00'),
@@ -309,6 +311,8 @@ class EventsModelTest extends TestCase
 
     public function testUpdateMultipleEvents()
     {
+        sleep(1);
+
         $initialStartTime1 = '2018-10-19 09:00:00';
         $initialEndTime1 = '2018-10-19 11:00:00';
 
@@ -391,6 +395,63 @@ class EventsModelTest extends TestCase
         $this->assertEquals('Updated multiple', $updatedEvent3[0]['description']);
         $this->assertEquals(2, $updatedEvent3[0]['user']['id']);
         $this->assertEquals(3, $updatedEvent3[0]['room']['id']);
+    }
+
+    public function testDeleteSingleEvent()
+    {
+        $initialEvents = self::$eventsModel->getEvents();
+
+        $this->assertCount(19, $initialEvents);
+
+        self::$eventsModel->deleteSingleEvent(19);
+
+        $updatedEvents = self::$eventsModel->getEvents();
+
+        $this->assertCount(18, $updatedEvents);
+
+        $deletedEvent = self::$eventsModel->getEvents(19);
+
+        $this->assertCount(0, $deletedEvent);
+    }
+
+    public function testDeleteMultipleEvents()
+    {
+        $recurId = self::$eventsModel->getEvents(14)[0]['recur_id'];
+        
+        $initialEvents = self::$eventsModel->getEvents();
+
+        $this->assertCount(18, $initialEvents);
+
+        self::$eventsModel->deleteMultipleEvents(14, $recurId);
+
+        $updatedEvents = self::$eventsModel->getEvents();
+
+        $this->assertCount(15, $updatedEvents);
+
+        $deletedEvent1 = self::$eventsModel->getEvents(14);
+        $deletedEvent2 = self::$eventsModel->getEvents(15);
+        $deletedEvent3 = self::$eventsModel->getEvents(16);
+
+        $this->assertCount(0, $deletedEvent1);
+        $this->assertCount(0, $deletedEvent2);
+        $this->assertCount(0, $deletedEvent3);
+    }
+
+    public function testDeleteFutureEventsOfUser()
+    {
+        $initialUserEvents = self::$eventsModel->getEvents(null, [
+            'user_id' => 2
+        ]);
+
+        $this->assertCount(8, $initialUserEvents);
+
+        self::$eventsModel->deleteFutureEventsOfUser(2);
+
+        $updatedUserEvents = self::$eventsModel->getEvents(null, [
+            'user_id' => 2
+        ]);
+
+        $this->assertCount(4, $updatedUserEvents);
     }
 
 }
