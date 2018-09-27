@@ -16,15 +16,18 @@ $queryBuilder = new QueryBuilder(
     DB_PASSWORD
 );
 
+$tablePrefix = ENV === 'tests' ?
+    DB_TABLE_TEST_PREFIX : DB_TABLE_PREFIX;
+
 Input::collectInput();
 
-Model::setDbPrefix(DB_TABLE_PREFIX);
+Model::setDbPrefix($tablePrefix);
 Model::setBuilder($queryBuilder);
 
-Validator::setDbPrefix(DB_TABLE_PREFIX);
+Validator::setDbPrefix($tablePrefix);
 Validator::setBuilder($queryBuilder);
 
-Auth::setDbPrefix(DB_TABLE_PREFIX);
+Auth::setDbPrefix($tablePrefix);
 Auth::setBuilder($queryBuilder);
 Auth::setTokenExpiresTime(AUTH_TOKEN_EXPIRES);
 
