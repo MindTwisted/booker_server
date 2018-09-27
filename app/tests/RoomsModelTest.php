@@ -35,17 +35,17 @@ class RoomsModelTest extends TestCase
             DB_PASSWORD
         );
 
-        $prefix = DB_TABLE_PREFIX;
+        $prefix = DB_TABLE_TEST_PREFIX;
 
         Model::setBuilder(self::$queryBuilder);
-        Model::setDbPrefix("test_{$prefix}");
+        Model::setDbPrefix($prefix);
 
         self::$roomsModel = new RoomsModel();
 
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}rooms");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}rooms");
 
         self::$queryBuilder->raw(
-            "CREATE TABLE test_{$prefix}rooms (
+            "CREATE TABLE {$prefix}rooms (
                     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
                     is_active BOOLEAN DEFAULT 1,
@@ -53,7 +53,7 @@ class RoomsModelTest extends TestCase
                 )"
         );
 
-        self::$queryBuilder->table("test_{$prefix}rooms")
+        self::$queryBuilder->table("{$prefix}rooms")
             ->fields(['name', 'is_active'])
             ->values(
                 ['Boardroom 1', 1],
@@ -68,9 +68,9 @@ class RoomsModelTest extends TestCase
 
     public static function tearDownAfterClass()
     {
-        $prefix = DB_TABLE_PREFIX;
+        $prefix = DB_TABLE_TEST_PREFIX;
 
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}rooms");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}rooms");
     }
 
     public function testGetAllRooms()

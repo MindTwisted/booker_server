@@ -35,21 +35,21 @@ class EventsModelTest extends TestCase
             DB_PASSWORD
         );
 
-        $prefix = DB_TABLE_PREFIX;
+        $prefix = DB_TABLE_TEST_PREFIX;
 
         Model::setBuilder(self::$queryBuilder);
-        Model::setDbPrefix("test_{$prefix}");
+        Model::setDbPrefix($prefix);
 
         self::$eventsModel = new EventsModel();
 
         self::$queryBuilder->raw("SET FOREIGN_KEY_CHECKS=0");
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}rooms");
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}users");
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}events");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}rooms");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}users");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}events");
         self::$queryBuilder->raw("SET FOREIGN_KEY_CHECKS=1");
 
         self::$queryBuilder->raw(
-            "CREATE TABLE test_{$prefix}rooms (
+            "CREATE TABLE {$prefix}rooms (
                         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                         name VARCHAR(255) NOT NULL,
                         is_active BOOLEAN DEFAULT 1,
@@ -58,7 +58,7 @@ class EventsModelTest extends TestCase
         );
 
         self::$queryBuilder->raw(
-            "CREATE TABLE test_{$prefix}users (
+            "CREATE TABLE {$prefix}users (
                         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                         name VARCHAR(255) NOT NULL,
                         email VARCHAR(255) NOT NULL,
@@ -70,7 +70,7 @@ class EventsModelTest extends TestCase
         );
 
         self::$queryBuilder->raw(
-            "CREATE TABLE test_{$prefix}events (
+            "CREATE TABLE {$prefix}events (
                         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                         recur_id BIGINT UNSIGNED DEFAULT NULL,
                         description TEXT NOT NULL,
@@ -88,7 +88,7 @@ class EventsModelTest extends TestCase
                     )"
         );
 
-        self::$queryBuilder->table("test_{$prefix}rooms")
+        self::$queryBuilder->table("{$prefix}rooms")
             ->fields(['name', 'is_active'])
             ->values(
                 ['Boardroom 1', 1],
@@ -100,7 +100,7 @@ class EventsModelTest extends TestCase
             ->insert()
             ->run();
 
-        self::$queryBuilder->table("test_{$prefix}users")
+        self::$queryBuilder->table("{$prefix}users")
             ->fields(['name', 'email', 'password', 'role', 'is_active'])
             ->values(
                 ['John Walker', 'john@example.com', password_hash('secret', PASSWORD_BCRYPT), 'admin', 1],
@@ -111,7 +111,7 @@ class EventsModelTest extends TestCase
             ->insert()
             ->run();
 
-        self::$queryBuilder->table("test_{$prefix}events")
+        self::$queryBuilder->table("{$prefix}events")
             ->fields(['description', 'start_time', 'end_time', 'user_id', 'room_id', 'recur_id'])
             ->values(
                 ['Meeting', '2018-09-18 09:00:01', '2018-09-18 10:59:59', 2, 1, NULL],
@@ -137,12 +137,12 @@ class EventsModelTest extends TestCase
 
     public static function tearDownAfterClass()
     {
-        $prefix = DB_TABLE_PREFIX;
+        $prefix = DB_TABLE_TEST_PREFIX;
 
         self::$queryBuilder->raw("SET FOREIGN_KEY_CHECKS=0");
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}rooms");
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}users");
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}events");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}rooms");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}users");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}events");
         self::$queryBuilder->raw("SET FOREIGN_KEY_CHECKS=1");
     }
 
@@ -451,7 +451,7 @@ class EventsModelTest extends TestCase
             'user_id' => 2
         ]);
 
-        $this->assertCount(4, $updatedUserEvents);
+        $this->assertCount(5, $updatedUserEvents);
     }
 
 }

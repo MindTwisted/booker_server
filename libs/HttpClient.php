@@ -7,22 +7,34 @@ class HttpClient
     private $response;
     private $code;
 
+    /**
+     * Constructor
+     */
     public function __construct($response, $code)
     {
         $this->response = $response;
         $this->code = $code;
     }
 
+    /**
+     * Convert json response into associative array
+     */
     public function jsonToArray()
     {
         return json_decode($this->response, true);
     }
 
+    /**
+     * Get response http status code
+     */
     public function code()
     {
         return $this->code;
     }
 
+    /**
+     * Perform http GET request
+     */
     public static function get($url, array $headers = [])
     {
         $ch = curl_init($url);
@@ -38,6 +50,9 @@ class HttpClient
         return new self($response, $code);
     }
 
+    /**
+     * Perform http POST request
+     */
     public static function post($url, $body, array $headers = [])
     {
         $ch = curl_init($url);
@@ -55,6 +70,9 @@ class HttpClient
         return new self($response, $code);
     }
 
+    /**
+     * Perform http PUT request
+     */
     public static function put($url, $body, array $headers = [])
     {
         $ch = curl_init($url);
@@ -72,6 +90,9 @@ class HttpClient
         return new self($response, $code);
     }
 
+    /**
+     * Perform http DELETE request
+     */
     public static function delete($url, $body, array $headers = [])
     {
         $ch = curl_init($url);

@@ -35,17 +35,17 @@ class UsersModelTest extends TestCase
             DB_PASSWORD
         );
 
-        $prefix = DB_TABLE_PREFIX;
+        $prefix = DB_TABLE_TEST_PREFIX;
 
         Model::setBuilder(self::$queryBuilder);
-        Model::setDbPrefix("test_{$prefix}");
+        Model::setDbPrefix($prefix);
 
         self::$usersModel = new UsersModel();
 
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}users");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}users");
 
         self::$queryBuilder->raw(
-            "CREATE TABLE test_{$prefix}users (
+            "CREATE TABLE {$prefix}users (
                         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                         name VARCHAR(255) NOT NULL,
                         email VARCHAR(255) NOT NULL,
@@ -56,7 +56,7 @@ class UsersModelTest extends TestCase
                     )"
         );
 
-        self::$queryBuilder->table("test_{$prefix}users")
+        self::$queryBuilder->table("{$prefix}users")
             ->fields(['name', 'email', 'password', 'role', 'is_active'])
             ->values(
                 ['John Walker', 'john@example.com', password_hash('secret', PASSWORD_BCRYPT), 'admin', 1],
@@ -70,9 +70,9 @@ class UsersModelTest extends TestCase
 
     public static function tearDownAfterClass()
     {
-        $prefix = DB_TABLE_PREFIX;
+        $prefix = DB_TABLE_TEST_PREFIX;
 
-        self::$queryBuilder->raw("DROP TABLE IF EXISTS test_{$prefix}users");
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}users");
     }
 
     public function testGetAllUsers()
