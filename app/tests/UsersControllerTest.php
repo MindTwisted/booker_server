@@ -333,4 +333,15 @@ class UsersControllerTest extends TestCase
 
         $this->assertCount(2, $data);
     }
+
+    public function testUserCanNotDeleteHimself()
+    {
+        $adminToken = self::$adminToken;
+
+        $response = HttpClient::delete(ROOT_URL . '/api/users/1', [], [
+            "Authorization: Bearer {$adminToken}"
+        ]);
+        
+        $this->assertEquals(403, $response->code());
+    }
 }

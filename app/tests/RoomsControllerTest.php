@@ -330,4 +330,15 @@ class RoomsControllerTest extends TestCase
 
         $this->assertCount(4, $data);
     }
+
+    public function testRoomWithComingEventsCanNotBeDeleted()
+    {
+        $adminToken = self::$adminToken;
+
+        $response = HttpClient::delete(ROOT_URL . '/api/rooms/1', [], [
+            "Authorization: Bearer {$adminToken}"
+        ]);
+        
+        $this->assertEquals(409, $response->code());
+    }
 }
