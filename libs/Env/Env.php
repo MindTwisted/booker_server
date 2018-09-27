@@ -7,7 +7,7 @@ class Env
     /**
      * Store ENV data
      */
-    private static $env = [];
+    private static $env;
 
     /**
      * Read ENV from file and store in property
@@ -15,6 +15,7 @@ class Env
     public static function setEnvFromFile($filePath)
     {
         $fileContents = file($filePath);
+        self::$env = [];
 
         foreach ($fileContents as $line)
         {

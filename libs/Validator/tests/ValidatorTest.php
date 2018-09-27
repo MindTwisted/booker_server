@@ -1,11 +1,15 @@
 <?php
 
-require_once 'libs/QueryBuilder/config.php';
 require_once 'libs/Validator/Validator.php';
 require_once 'libs/Input/Input.php';
 require_once 'libs/QueryBuilder/src/exception/QueryBuilderException.php';
 require_once 'libs/QueryBuilder/src/traits/Validators.php';
 require_once 'libs/QueryBuilder/src/QueryBuilder.php';
+require_once 'libs/Env/Env.php';
+
+\libs\Env\Env::setEnvFromFile('./.env');
+
+require_once 'app/config/config.php';
 
 use libs\Validator\Validator;
 use libs\Input\Input;
@@ -16,7 +20,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     /**
      * QueryBuilder instance
      */
-    protected static $builder;
+    protected static $queryBuilder;
     
     /**
      * Set before tests
@@ -60,25 +64,27 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
 
         Input::collectInput();
 
-        self::$builder = new QueryBuilder(
+        self::$queryBuilder = new QueryBuilder(
             'mysql',
-            MYSQL_SETTINGS['host'],
-            MYSQL_SETTINGS['port'],
-            MYSQL_SETTINGS['database'],
-            MYSQL_SETTINGS['user'],
-            MYSQL_SETTINGS['password']
+            DB_HOST,
+            DB_PORT,
+            DB_DATABASE,
+            DB_USER,
+            DB_PASSWORD
         );
 
-        self::$builder->raw('DROP TABLE IF EXISTS authors');
-        self::$builder->raw(
-            "CREATE TABLE IF NOT EXISTS authors (
+        $prefix = DB_TABLE_TEST_PREFIX;
+
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}authors");
+        self::$queryBuilder->raw(
+            "CREATE TABLE IF NOT EXISTS {$prefix}authors (
                   id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                   first_name VARCHAR(255),
                   last_name VARCHAR(255)
             )"
         );
-        self::$builder->raw(
-            "INSERT INTO authors (first_name, last_name) 
+        self::$queryBuilder->raw(
+            "INSERT INTO {$prefix}authors (first_name, last_name) 
              VALUES 
              ('Matthew', 'Johnson'),
              ('Tony', 'Fortune'),
@@ -86,7 +92,8 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
              ('William', 'Robinson')"
         );
 
-        Validator::setBuilder(self::$builder);
+        Validator::setBuilder(self::$queryBuilder);
+        Validator::setDbPrefix($prefix);
     }
 
     /**
@@ -94,8 +101,8 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
      */
     public static function tearDownAfterClass()
     {
-        self::$builder->raw('DROP TABLE IF EXISTS authors');
-        self::$builder = null;
+        self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}authors");
+        self::$queryBuilder = null;
     }
 
     /**
