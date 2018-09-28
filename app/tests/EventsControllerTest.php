@@ -292,8 +292,8 @@ class EventsControllerTest extends TestCase
             'description' => 'NEW event',
             'user_id' => 1,
             'room_id' => 2,
-            'start_time' => strtotime('2018-10-04 16:40:00'),
-            'end_time' => strtotime('2018-10-04 17:40:00')
+            'start_time' => strtotime('2018-10-04 16:00:00'),
+            'end_time' => strtotime('2018-10-04 18:00:00')
         ], [
             "Authorization: Bearer {$adminToken}"
         ]);
@@ -318,8 +318,8 @@ class EventsControllerTest extends TestCase
             'description' => 'Multiple event',
             'user_id' => 1,
             'room_id' => 2,
-            'start_time' => strtotime('2018-10-05 16:40:00'),
-            'end_time' => strtotime('2018-10-05 17:40:00'),
+            'start_time' => strtotime('2018-10-05 16:00:00'),
+            'end_time' => strtotime('2018-10-05 18:00:00'),
             'recur_type' => 'weekly',
             'recur_duration' => 2
         ], [
@@ -354,6 +354,91 @@ class EventsControllerTest extends TestCase
 
         $this->assertCount(1, $data);
         $this->assertEquals('Multiple event', $data[0]['description']);
+    }
+
+    public function testEventCanNotBeCreatedInPast()
+    {
+        $adminToken = self::$adminToken;
+
+        $response = HttpClient::post(ROOT_URL . '/api/events', [
+            'description' => 'NEW event',
+            'user_id' => 1,
+            'room_id' => 2,
+            'start_time' => strtotime('2018-08-04 16:00:00'),
+            'end_time' => strtotime('2018-08-04 18:00:00')
+        ], [
+            "Authorization: Bearer {$adminToken}"
+        ]);
+
+        $this->assertEquals(422, $response->code());
+    }
+
+    public function testEventCanNotBeCreatedAtWeekend()
+    {
+        $adminToken = self::$adminToken;
+
+        $response = HttpClient::post(ROOT_URL . '/api/events', [
+            'description' => 'NEW event',
+            'user_id' => 1,
+            'room_id' => 2,
+            'start_time' => strtotime('2018-10-27 16:00:00'),
+            'end_time' => strtotime('2018-10-27 18:00:00')
+        ], [
+            "Authorization: Bearer {$adminToken}"
+        ]);
+
+        $this->assertEquals(422, $response->code());
+    }
+
+    public function testEventCanNotBeCreatedOutOf8to20TimeRange()
+    {
+        $adminToken = self::$adminToken;
+
+        $response = HttpClient::post(ROOT_URL . '/api/events', [
+            'description' => 'NEW event',
+            'user_id' => 1,
+            'room_id' => 2,
+            'start_time' => strtotime('2018-10-24 16:00:00'),
+            'end_time' => strtotime('2018-10-24 21:00:00')
+        ], [
+            "Authorization: Bearer {$adminToken}"
+        ]);
+
+        $this->assertEquals(422, $response->code());
+    }
+
+    public function testEventCanNotBeCreatedIfAnotherEventExistsInTheSameTime()
+    {
+        $adminToken = self::$adminToken;
+
+        $response = HttpClient::post(ROOT_URL . '/api/events', [
+            'description' => 'NEW event',
+            'user_id' => 1,
+            'room_id' => 2,
+            'start_time' => strtotime('2018-10-04 16:00:00'),
+            'end_time' => strtotime('2018-10-04 17:00:00')
+        ], [
+            "Authorization: Bearer {$adminToken}"
+        ]);
+
+        $this->assertEquals(409, $response->code());
+    }
+
+    public function testEventDurationCanNotBeLessThan30Minutes()
+    {
+        $adminToken = self::$adminToken;
+
+        $response = HttpClient::post(ROOT_URL . '/api/events', [
+            'description' => 'NEW event',
+            'user_id' => 1,
+            'room_id' => 2,
+            'start_time' => strtotime('2018-10-05 10:45:00'),
+            'end_time' => strtotime('2018-10-05 11:00:00')
+        ], [
+            "Authorization: Bearer {$adminToken}"
+        ]);
+
+        $this->assertEquals(422, $response->code());
     }
 
     public function testUpdateSingleEvent()

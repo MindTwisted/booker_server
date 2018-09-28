@@ -6,8 +6,8 @@ Header set Access-Control-Allow-Origin "*"
 
 RewriteEngine On 
 
-RewriteBase /~user5/booker-server/
-# RewriteBase /booker/server/
+# RewriteBase /~user5/booker-server/
+RewriteBase /booker/server/
 
 RewriteCond %{REQUEST_FILENAME} !-f 
 RewriteCond %{REQUEST_FILENAME} !-d

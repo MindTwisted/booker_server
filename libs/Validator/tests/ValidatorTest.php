@@ -101,6 +101,8 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
      */
     public static function tearDownAfterClass()
     {
+        $prefix = DB_TABLE_TEST_PREFIX;
+        
         self::$queryBuilder->raw("DROP TABLE IF EXISTS {$prefix}authors");
         self::$queryBuilder = null;
     }
